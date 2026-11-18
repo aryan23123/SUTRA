@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block title %}Home — Sutra{% endblock %}
+{% block breadcrumb %}Home{% endblock %}
+
+{% block content %}
+    <section class="welcome-row">
+        <div>
+            <p class="eyebrow">YOUR SPACE, AT YOUR PACE</p>
+            <h1>Welcome back, {{ user.first_name|default:user.username }}.</h1>
+            <p class="welcome-copy">A home for the notes, plans, and little details that keep your work moving.</p>
+        </div>
+        <a href="{% url 'record_create' %}" class="button-link primary-action"><span aria-hidden="true">＋</span> Create a record</a>
+    </section>
+
+    <section class="stats-grid" aria-label="Workspace overview">
+        <div class="stat-box">
+            <span class="stat-icon stat-icon-lilac" aria-hidden="true">▤</span>
+            <div><p>Total records</p><strong>{{ total_records }}</strong></div>
+        </div>
+        <div class="stat-box">
+            <span class="stat-icon stat-icon-green" aria-hidden="true">✓</span>
+            <div><p>Active records</p><strong>{{ active_records }}</strong></div>
+        </div>
+        <div class="stat-box">
+            <span class="stat-icon stat-icon-yellow" aria-hidden="true">✎</span>
+            <div><p>Draft records</p><strong>{{ draft_records }}</strong></div>
+        </div>
+        <div class="stat-box">
+            <span class="stat-icon stat-icon-peach" aria-hidden="true">↗</span>
+            <div><p>Archived</p><strong>{{ archived_records }}</strong></div>
+        </div>
+        <div class="stat-box">
+            <span class="stat-icon stat-icon-blue" aria-hidden="true">▦</span>
+            <div><p>Categories</p><strong>{{ total_categories }}</strong></div>
+        </div>
+        <div class="stat-box">
+            <span class="stat-icon stat-icon-peach" aria-hidden="true">▧</span>
+            <div><p>Documents</p><strong>{{ total_documents }}</strong></div>
+        </div>
+    </section>
+
+    <div class="dashboard-grid">
+        <section class="content-panel recent-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">PICK UP WHERE YOU LEFT OFF</p>
+                    <h2>Recently updated records</h2>
+                </div>
+                <a class="subtle-link" href="{% url 'record_list' %}">All records <span aria-hidden="true">→</span></a>
+            </div>
+
+            {% if recent_records %}
+                <div class="record-list">
+                    {% for record in recent_records %}
+                        <a class="record-row" href="{% url 'record_detail' record.pk %}">
+                            <span class="record-file-icon" aria-hidden="true">▤</span>
+                            <span class="record-main">
+                                <span class="record-title">{{ record.title }}</span>
+                                <span class="record-meta">
+                                    <span>{{ record.category.name|default:'Uncategorized' }}</span>
+                                    <span class="meta-dot" aria-hidden="true">·</span>
+                                    <span>{{ record.updated_at|date:'M j, Y' }}</span>
+                                </span>
+                            </span>
+                            <span class="badge status-{{ record.status }}">{{ record.get_status_display }}</span>
+                            <span class="record-chevron" aria-hidden="true">↗</span>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <span class="empty-illustration" aria-hidden="true">✳</span>
+                    <h3>Your next good idea can start here.</h3>
+                    <p>Create a record for a meeting note, a project plan, or anything you want to find again.</p>
+                    <a class="subtle-link" href="{% url 'record_create' %}">Create your first record <span aria-hidden="true">→</span></a>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="content-panel documents-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">YOUR REFERENCE SHELF</p>
+                    <h2>Recently added documents</h2>
+                </div>
+                <a class="subtle-link" href="{% url 'document_list' %}">All documents <span aria-hidden="true">→</span></a>
+            </div>
+
+            {% if recent_documents %}
+                <div class="document-list">
+                    {% for document in recent_documents %}
+                        <div class="document-row">
+                            <span class="document-icon" aria-hidden="true">↳</span>
+                            <span class="document-copy">
+                                <a href="{% url 'document_download' document.pk %}">{{ document.title }}</a>
+                                <span>{{ document.record.title }} · {{ document.uploaded_at|date:'M j, Y' }}</span>
+                            </span>
+                            <a class="download-link" href="{% url 'document_download' document.pk %}" aria-label="Download {{ document.title }}">↓</a>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state compact-empty">
+                    <span class="empty-illustration" aria-hidden="true">▧</span>
+                    <h3>No documents yet.</h3>
+                    <p>Attach a PDF, DOCX, or TXT file to a record to keep it close at hand.</p>
+                    <a class="subtle-link" href="{% url 'record_list' %}">Find a record <span aria-hidden="true">→</span></a>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+
+    <section class="content-panel activity-panel">
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">A QUICK LOOK BACK</p>
+                <h2>Recent activity</h2>
+            </div>
+            <span class="activity-caption">From record updates and document uploads</span>
+        </div>
+        {% if recent_activity %}
+            <div class="activity-list">
+                {% for item in recent_activity %}
+                    <div class="activity-row">
+                        <span class="activity-icon activity-{{ item.kind }}" aria-hidden="true">{% if item.kind == 'document' %}↳{% else %}▤{% endif %}</span>
+                        <div class="activity-copy">
+                            <span class="activity-action">
+                                {% if item.kind == 'document' %}
+                                    <a href="{% url 'document_download' item.document_id %}">{{ item.action }}</a>
+                                    <span>{{ item.title }} <span class="activity-parent">in {{ item.record_title }}</span></span>
+                                {% else %}
+                                    <a href="{% url 'record_detail' item.record_id %}">{{ item.action }}</a>
+                                    <span>{{ item.title }}</span>
+                                {% endif %}
+                            </span>
+                            <span class="activity-meta">{% if item.actor %}{{ item.actor }} <span aria-hidden="true">·</span> {% endif %}{{ item.timestamp|date:'M j, Y · g:i A' }}</span>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="activity-empty">Activity will appear here as you create records and add documents.</p>
+        {% endif %}
+    </section>
+
+    <footer class="dashboard-footer">
+        <span><span class="footer-mark" aria-hidden="true">✳</span> Made for the way your team thinks.</span>
+        <span>Workspace numbers update from your saved records and documents.</span>
+    </footer>
+{% endblock %}

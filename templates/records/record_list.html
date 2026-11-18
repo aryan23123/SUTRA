@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Records{% endblock %}
+
+{% block content %}
+    <div class="heading-row">
+        <h1>Records</h1>
+        <div class="btn-row">
+            <a href="{% url 'record_create' %}" class="button-link">Create record</a>
+            <a href="{% url 'export_records_pdf' %}" class="button-link secondary">Export PDF</a>
+            <a href="{% url 'export_records_excel' %}" class="button-link secondary">Export Excel</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Search and filter</h2>
+        <form method="get">
+            <div class="form-grid">
+                <div>
+                    {{ filter_form.q.label_tag }}
+                    {{ filter_form.q }}
+                </div>
+                <div>
+                    {{ filter_form.status.label_tag }}
+                    {{ filter_form.status }}
+                </div>
+                <div>
+                    {{ filter_form.category.label_tag }}
+                    {{ filter_form.category }}
+                </div>
+            </div>
+            <div>
+                <label>Tags</label>
+                <div class="checkbox-list">
+                    {% for tag in filter_form.tags %}
+                        <label>{{ tag }}</label>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="btn-row">
+                <button type="submit">Apply filters</button>
+                <a href="{% url 'record_list' %}" class="button-link secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem;">
+        {% if records %}
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Category</th>
+                            <th>Tags</th>
+                            <th>Created by</th>
+                            <th>Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in records %}
+                            <tr>
+                                <td><a href="{% url 'record_detail' record.pk %}">{{ record.title }}</a></td>
+                                <td><span class="badge">{{ record.get_status_display }}</span></td>
+                                <td>{{ record.category.name|default:'Uncategorized' }}</td>
+                                <td>
+                                    {% for tag in record.tags.all %}
+                                        {{ tag.name }}{% if not forloop.last %}, {% endif %}
+                                    {% empty %}
+                                        None
+                                    {% endfor %}
+                                </td>
+                                <td>{{ record.created_by.get_full_name|default:record.created_by.username }}</td>
+                                <td>{{ record.updated_at|date:'Y-m-d H:i' }}</td>
+                                <td>
+                                    <a href="{% url 'record_edit' record.pk %}">Edit</a>
+                                    <form method="post" action="{% url 'record_delete' record.pk %}" class="inline-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="danger">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p>No records match the current search.</p>
+        {% endif %}
+    </div>
+{% endblock %}

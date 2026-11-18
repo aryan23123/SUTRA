@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Your profile — Sutra{% endblock %}
+{% block breadcrumb %}Profile{% endblock %}
+
+{% block content %}
+    <section class="profile-heading">
+        <div class="profile-avatar" aria-hidden="true">{{ user.first_name|default:user.username|slice:":1"|upper }}</div>
+        <div>
+            <p class="eyebrow">YOUR ACCOUNT</p>
+            <h1>{{ user.get_full_name|default:user.username }}</h1>
+            <p class="profile-subtitle">A little space for your details and the work you’ve gathered.</p>
+        </div>
+    </section>
+
+    <section class="profile-stats" aria-label="Your workspace activity">
+        <div class="profile-stat"><span>Records created</span><strong>{{ record_count }}</strong></div>
+        <div class="profile-stat"><span>Active</span><strong>{{ active_record_count }}</strong></div>
+        <div class="profile-stat"><span>Drafts</span><strong>{{ draft_record_count }}</strong></div>
+        <div class="profile-stat"><span>Archived</span><strong>{{ archived_record_count }}</strong></div>
+        <div class="profile-stat"><span>Documents added</span><strong>{{ document_count }}</strong></div>
+    </section>
+
+    <div class="profile-grid">
+        <section class="content-panel profile-form-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="eyebrow">PERSONAL DETAILS</p>
+                    <h2>Make yourself at home</h2>
+                </div>
+                <span class="idea-spark" aria-hidden="true">✳</span>
+            </div>
+            <form method="post" class="profile-form">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <p class="profile-help">Your username is used to sign in and can’t be changed here.</p>
+                <div class="btn-row">
+                    <button type="submit">Save changes</button>
+                </div>
+            </form>
+        </section>
+
+        <aside class="content-panel profile-account-panel">
+            <p class="eyebrow">ACCOUNT DETAILS</p>
+            <h2>Your Sutra account</h2>
+            <dl class="account-details">
+                <div>
+                    <dt>Username</dt>
+                    <dd>{{ user.username }}</dd>
+                </div>
+                <div>
+                    <dt>Member since</dt>
+                    <dd>{{ user.date_joined|date:'F j, Y' }}</dd>
+                </div>
+                <div>
+                    <dt>Account</dt>
+                    <dd><span class="account-status"><span aria-hidden="true">●</span> Active</span></dd>
+                </div>
+            </dl>
+            <a class="subtle-link profile-record-link" href="{% url 'record_list' %}">Browse your records <span aria-hidden="true">→</span></a>
+        </aside>
+    </div>
+{% endblock %}

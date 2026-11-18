@@ -1,0 +1,99 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#fbfaf8">
+    <title>{% block title %}Sutra — your team's workspace{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    {% if user.is_authenticated %}
+        <div class="app-shell">
+            <aside class="sidebar" aria-label="Main navigation">
+                <a class="brand" href="{% url 'dashboard' %}">
+                    <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+                    <span>Sutra</span>
+                    <span class="workspace-switch" aria-label="Workspace menu">⌄</span>
+                </a>
+
+                <div class="workspace-label">WORKSPACE</div>
+                <nav class="sidebar-nav">
+                    <a class="nav-item{% if request.resolver_match.url_name == 'dashboard' %} is-active{% endif %}" href="{% url 'dashboard' %}">
+                        <span class="nav-icon" aria-hidden="true">⌂</span><span>Home</span>
+                    </a>
+                    <a class="nav-item{% if request.resolver_match.url_name == 'record_list' or request.resolver_match.url_name == 'record_detail' or request.resolver_match.url_name == 'record_create' or request.resolver_match.url_name == 'record_edit' %} is-active{% endif %}" href="{% url 'record_list' %}">
+                        <span class="nav-icon" aria-hidden="true">▤</span><span>Records</span>
+                        <span class="nav-arrow" aria-hidden="true">↗</span>
+                    </a>
+                    <a class="nav-item{% if request.resolver_match.url_name == 'category_list' or request.resolver_match.url_name == 'category_edit' %} is-active{% endif %}" href="{% url 'category_list' %}">
+                        <span class="nav-icon" aria-hidden="true">▦</span><span>Categories</span>
+                    </a>
+                    <a class="nav-item{% if request.resolver_match.url_name == 'tag_list' or request.resolver_match.url_name == 'tag_edit' %} is-active{% endif %}" href="{% url 'tag_list' %}">
+                        <span class="nav-icon" aria-hidden="true">⌑</span><span>Tags</span>
+                    </a>
+                    <a class="nav-item{% if request.resolver_match.url_name == 'document_list' or request.resolver_match.url_name == 'document_upload' %} is-active{% endif %}" href="{% url 'document_list' %}">
+                        <span class="nav-icon" aria-hidden="true">▧</span><span>Documents</span>
+                    </a>
+                    <a class="nav-item{% if request.resolver_match.url_name == 'profile' %} is-active{% endif %}" href="{% url 'profile' %}">
+                        <span class="nav-icon" aria-hidden="true">◉</span><span>Profile</span>
+                    </a>
+                </nav>
+
+                <div class="sidebar-bottom">
+                    <div class="sidebar-tip">
+                        <span class="tip-spark" aria-hidden="true">✳</span>
+                        <p>A little more room for your best thinking.</p>
+                        <a href="{% url 'record_create' %}">Add your first thought <span aria-hidden="true">→</span></a>
+                    </div>
+                    <div class="sidebar-account">
+                        <span class="avatar avatar-user">{{ user.first_name|default:user.username|slice:":1"|upper }}</span>
+                        <a class="account-name" href="{% url 'profile' %}">{{ user.get_full_name|default:user.username }}</a>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="logout-button" aria-label="Log out">↗</button>
+                        </form>
+                    </div>
+                </div>
+            </aside>
+
+            <div class="workspace">
+                <header class="workspace-bar">
+                    <div class="breadcrumb"><span>Sutra</span><span aria-hidden="true">/</span><strong>{% block breadcrumb %}Home{% endblock %}</strong></div>
+                    <div class="workspace-actions">
+                        <span class="saved-indicator"><span aria-hidden="true">●</span> All changes saved</span>
+                        <a class="topbar-create" href="{% url 'record_create' %}"><span aria-hidden="true">＋</span> New</a>
+                    </div>
+                </header>
+
+    {% else %}
+        <header class="public-topbar">
+            <div class="public-nav">
+                <a class="brand public-brand" href="{% url 'login' %}">
+                    <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+                    <span>Sutra</span>
+                </a>
+                <nav class="public-links" aria-label="Account navigation">
+                    <a href="{% url 'login' %}">Log in</a>
+                    <a class="topbar-create" href="{% url 'register' %}">Get started <span aria-hidden="true">→</span></a>
+                </nav>
+            </div>
+        </header>
+    {% endif %}
+    <main class="{% if user.is_authenticated %}page-content{% else %}public-content{% endif %}">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </main>
+    {% if user.is_authenticated %}
+        </div>
+        </div>
+    {% endif %}
+</body>
+</html>

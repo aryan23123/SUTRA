@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Documents{% endblock %}
+
+{% block content %}
+    <div class="heading-row">
+        <h1>Documents</h1>
+        <a href="{% url 'record_list' %}" class="button-link secondary">Back to records</a>
+    </div>
+
+    <div class="card">
+        {% if documents %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Linked record</th>
+                        <th>File</th>
+                        <th>Uploaded by</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for document in documents %}
+                        <tr>
+                            <td>{{ document.title }}</td>
+                            <td><a href="{% url 'record_detail' document.record.pk %}">{{ document.record.title }}</a></td>
+                            <td>{{ document.file.name|cut:'documents/' }}</td>
+                            <td>{{ document.uploaded_by.get_full_name|default:document.uploaded_by.username|default:'N/A' }}</td>
+                            <td>
+                                <a href="{% url 'document_download' document.pk %}">Download</a>
+                                <form method="post" action="{% url 'document_delete' document.pk %}" class="inline-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No documents uploaded yet.</p>
+        {% endif %}
+    </div>
+{% endblock %}

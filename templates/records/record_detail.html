@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ record.title }}{% endblock %}
+{% block breadcrumb %}Records{% endblock %}
+
+{% block content %}
+    <div class="record-page">
+        <section class="record-page-heading">
+            <div class="record-heading-copy">
+                <p class="eyebrow">{{ record.category.name|default:'UNCATEGORIZED' }} <span aria-hidden="true">/</span> {{ record.get_status_display|upper }}</p>
+                <h1>{{ record.title }}</h1>
+                <p>Created by {{ record.created_by.get_full_name|default:record.created_by.username }} <span aria-hidden="true">·</span> {{ record.created_at|date:'M j, Y' }}</p>
+            </div>
+            <div class="btn-row">
+                <a href="{% url 'record_edit' record.pk %}" class="button-link primary-action">Edit record</a>
+                <a href="{% url 'record_list' %}" class="button-link secondary">All records</a>
+            </div>
+        </section>
+
+        <div class="record-detail-grid">
+            <article class="content-panel record-article">
+                <div class="record-properties">
+                    <div class="record-property">
+                        <span>Status</span>
+                        <strong><span class="badge status-{{ record.status }}">{{ record.get_status_display }}</span></strong>
+                    </div>
+                    <div class="record-property">
+                        <span>Category</span>
+                        <strong>{{ record.category.name|default:'Uncategorized' }}</strong>
+                    </div>
+                    <div class="record-property record-tags-property">
+                        <span>Tags</span>
+                        <strong>
+                            {% for tag in record.tags.all %}
+                                <span class="badge">{{ tag.name }}</span>
+                            {% empty %}
+                                <span class="property-empty">No tags</span>
+                            {% endfor %}
+                        </strong>
+                    </div>
+                    <div class="record-property">
+                        <span>Last updated</span>
+                        <strong>{{ record.updated_at|date:'M j, Y · g:i A' }}</strong>
+                    </div>
+                </div>
+
+                <section class="record-description">
+                    <p class="eyebrow">OVERVIEW</p>
+                    <div class="record-description-copy">{{ record.description|linebreaks }}</div>
+                </section>
+            </article>
+
+            <aside class="record-side-column">
+                <section class="content-panel related-documents">
+                    <div class="panel-heading">
+                        <div>
+                            <p class="eyebrow">ATTACHED MATERIAL</p>
+                            <h2>Related documents</h2>
+                        </div>
+                        <span class="idea-spark" aria-hidden="true">▧</span>
+                    </div>
+
+                    {% if record.documents.all %}
+                        <div class="document-list">
+                            {% for document in record.documents.all %}
+                                <div class="document-row">
+                                    <span class="document-icon" aria-hidden="true">↳</span>
+                                    <span class="document-copy">
+                                        <a href="{% url 'document_download' document.pk %}">{{ document.title }}</a>
+                                        <span>{{ document.uploaded_at|date:'M j, Y' }} · {{ document.uploaded_by.get_full_name|default:document.uploaded_by.username|default:'Workspace' }}</span>
+                                    </span>
+                                    <a class="download-link" href="{% url 'document_download' document.pk %}" aria-label="Download {{ document.title }}">↓</a>
+                                    <form method="post" action="{% url 'document_delete' document.pk %}" class="inline-form">
+                                        {% csrf_token %}
+                                        <button type="submit" class="delete-document-button" aria-label="Remove {{ document.title }}">×</button>
+                                    </form>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="property-empty">No documents are attached to this record yet.</p>
+                    {% endif %}
+
+                    <form class="detail-upload-form" method="post" action="{% url 'document_upload' record.pk %}" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ upload_form.as_p }}
+                        <button type="submit">Add a document</button>
+                    </form>
+                </section>
+
+                <section class="content-panel record-history">
+                    <p class="eyebrow">TIMELINE</p>
+                    <h2>Record history</h2>
+                    <div class="timeline-entry">
+                        <span class="timeline-dot" aria-hidden="true"></span>
+                        <div><strong>Created</strong><span>{{ record.created_at|date:'M j, Y · g:i A' }}</span></div>
+                    </div>
+                    {% if record.updated_at != record.created_at %}
+                        <div class="timeline-entry">
+                            <span class="timeline-dot timeline-dot-muted" aria-hidden="true"></span>
+                            <div><strong>Last updated</strong><span>{{ record.updated_at|date:'M j, Y · g:i A' }}</span></div>
+                        </div>
+                    {% endif %}
+                    <p class="history-note">Sutra shows creation and latest-update timestamps; it does not keep a full edit-by-edit history.</p>
+                </section>
+            </aside>
+        </div>
+
+        <section class="content-panel delete-record-panel">
+            <div>
+                <h2>Delete record</h2>
+                <p>Remove this record and its associated document entries from Sutra.</p>
+            </div>
+            <form method="post" action="{% url 'record_delete' record.pk %}">
+                {% csrf_token %}
+                <button type="submit" class="danger">Delete record</button>
+            </form>
+        </section>
+    </div>
+{% endblock %}

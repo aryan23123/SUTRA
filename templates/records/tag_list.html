@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Tags{% endblock %}
+
+{% block content %}
+    <div class="heading-row">
+        <h1>Tags</h1>
+        <a href="{% url 'record_list' %}" class="button-link secondary">Back to records</a>
+    </div>
+
+    <div class="card">
+        <h2>Create tag</h2>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Create</button>
+        </form>
+    </div>
+
+    <div class="card" style="margin-top:1.5rem;">
+        <h2>Existing tags</h2>
+        {% if tags %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tag in tags %}
+                        <tr>
+                            <td>{{ tag.name }}</td>
+                            <td>
+                                <a href="{% url 'tag_edit' tag.pk %}">Edit</a>
+                                <form method="post" action="{% url 'tag_delete' tag.pk %}" class="inline-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="danger">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No tags yet.</p>
+        {% endif %}
+    </div>
+{% endblock %}

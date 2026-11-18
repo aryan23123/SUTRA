@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="heading-row">
+            <h1>{{ title }}</h1>
+            {% if record %}
+                <a href="{% url 'record_detail' record.pk %}" class="button-link secondary">Back to record</a>
+            {% else %}
+                <a href="{% url 'record_list' %}" class="button-link secondary">Back to list</a>
+            {% endif %}
+        </div>
+
+        {% if not has_categories or not has_tags %}
+            <div class="form-hint">
+                {% if not has_categories %}
+                    <p>No categories have been created yet. <a href="{% url 'category_list' %}" target="_blank" rel="noopener">Create a category</a> and it will appear here.</p>
+                {% endif %}
+                {% if not has_tags %}
+                    <p>No tags have been created yet. <a href="{% url 'tag_list' %}" target="_blank" rel="noopener">Create tags</a> and they will appear here.</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div class="btn-row">
+                <button type="submit">Save</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

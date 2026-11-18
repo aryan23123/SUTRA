@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload document{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="heading-row">
+            <h1>Upload document for {{ record.title }}</h1>
+            <a href="{% url 'record_detail' record.pk %}" class="button-link secondary">Back</a>
+        </div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Upload</button>
+        </form>
+    </div>
+{% endblock %}
